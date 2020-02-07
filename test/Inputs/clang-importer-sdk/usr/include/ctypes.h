@@ -286,7 +286,9 @@ typedef struct ModRM {
 // Arrays
 //===---
 void useArray(char x[4], char y[], char z[][8]);
+#ifndef __cplusplus
 void staticBoundsArray(const char x[static 4]);
+#endif
 
 void useBigArray(char max_size[4096], char max_size_plus_one[4097]);
 void useBigArray2d(char max_size[][4096], char max_size_plus_one[][4097]);

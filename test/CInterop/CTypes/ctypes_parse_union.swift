@@ -1,4 +1,5 @@
 // RUN: %target-swift-frontend(mock-sdk: %clang-importer-sdk) -emit-ir %s
+// RUN: %target-swift-frontend(mock-sdk: %clang-importer-sdk) -enable-cxx-interop -emit-ir %s
 
 import ctypes
 

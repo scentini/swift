@@ -1,4 +1,6 @@
-// RUN: %target-typecheck-verify-swift %clang-importer-sdk
+// RUN: %target-swift-frontend(mock-sdk: %clang-importer-sdk) -typecheck %s -verify
+// RUN: %target-swift-frontend(mock-sdk: %clang-importer-sdk) -enable-cxx-interop -typecheck %s -verify
+
 
 import ctypes
 
@@ -229,11 +231,6 @@ func testArrays() {
 
   nullableArrayParameters([], [], [])
   nullableArrayParameters(nil, nil, nil)
-
-  // It would also be nice to warn here about the arrays being too short, but
-  // that's probably beyond us for a while.
-  staticBoundsArray([])
-  staticBoundsArray(nil) // expected-error {{'nil' is not compatible with expected argument type 'UnsafePointer<Int8>'}}
 }
 
 func testVaList() {

@@ -1,6 +1,8 @@
 // RUN: %empty-directory(%t.mcp)
 // RUN: not %target-swift-frontend(mock-sdk: %clang-importer-sdk) -enable-objc-interop -typecheck -F %S/Inputs/frameworks -I %S/Inputs/custom-modules -module-cache-path %t.mcp %s 2>&1 | %FileCheck %S/Inputs/custom-modules/ImportAsMember.h
 // RUN: %target-swift-frontend(mock-sdk: %clang-importer-sdk) -enable-objc-interop -typecheck -F %S/Inputs/frameworks -I %S/Inputs/custom-modules -module-cache-path %t.mcp %s -verify
+// RUN: %target-swift-frontend(mock-sdk: %clang-importer-sdk) -enable-cxx-interop -typecheck -F %S/Inputs/frameworks -I %S/Inputs/custom-modules -module-cache-path %t.mcp %s -verify
+
 
 import ImportAsMember
 import ImportAsMemberSubmodules

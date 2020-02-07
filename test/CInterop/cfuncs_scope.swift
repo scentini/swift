@@ -1,4 +1,5 @@
-// RUN: not %target-swift-frontend -typecheck %s -I %S/Inputs/custom-modules 2>&1 | %FileCheck %s
+// RUN: not %target-swift-frontend -typecheck %s -I %S/Inputs 2>&1 | %FileCheck %s
+// RUN: not %target-swift-frontend -enable-cxx-interop -typecheck %s -I %S/Inputs 2>&1 | %FileCheck %s
 
 import LocalVsFileScope
 

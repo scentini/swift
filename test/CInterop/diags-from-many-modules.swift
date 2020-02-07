@@ -1,5 +1,9 @@
 // RUN: %empty-directory(%t)
-// RUN: %target-swift-frontend -typecheck %s -I %S/Inputs/custom-modules -module-cache-path %t 2> %t.err.txt
+// RUN: %target-swift-frontend -typecheck %s -I %S/Inputs -module-cache-path %t 2> %t.err.txt
+// RUN: %FileCheck -input-file=%t.err.txt %s
+
+// RUN: %empty-directory(%t)
+// RUN: %target-swift-frontend -enable-cxx-interop -typecheck %s -I %S/Inputs -module-cache-path %t 2> %t.err.txt
 // RUN: %FileCheck -input-file=%t.err.txt %s
 
 import Warnings1

@@ -1,4 +1,6 @@
-// RUN: %target-swift-frontend(mock-sdk: %clang-importer-sdk) -I %S/Inputs/custom-modules -Xcc -w -typecheck -verify %s
+// RUN: %empty-directory(%t)
+// RUN: %target-swift-frontend -enable-cxx-interop -I %S/Inputs/ -Xcc -w -typecheck -verify %s
+
 
 import SwiftName
 
@@ -12,10 +14,10 @@ func test() {
   var color2: ColorType = CT_Red // expected-error{{'ColorType' has been renamed to 'ColorKind'}}{{15-24=ColorKind}}
 
   // Enumerator remapping.
-  var excuse: HomeworkExcuse = .dogAteIt
-  excuse = .overslept // expected-error{{type 'HomeworkExcuse' has no member 'overslept'; did you mean 'Overslept'?}} {{13-22=Overslept}}
+  var excuse: homework.HomeworkExcuse = .dogAteIt
+  excuse = .overslept // expected-error{{type 'homework.HomeworkExcuse' has no member 'overslept'; did you mean 'Overslept'?}} {{13-22=Overslept}}
   excuse = .tired
-  excuse = .tooHard // expected-error{{type 'HomeworkExcuse' has no member 'tooHard'; did you mean 'TooHard'?}} {{13-20=TooHard}}
+  excuse = .tooHard // expected-error{{type 'homework.HomeworkExcuse' has no member 'tooHard'; did you mean 'TooHard'?}} {{13-20=TooHard}}
   excuse = .challenging
 
   // Typedef-of-anonymous-type-name renaming

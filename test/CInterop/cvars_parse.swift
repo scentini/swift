@@ -1,4 +1,5 @@
 // RUN: %target-swift-frontend(mock-sdk: %clang-importer-sdk) -typecheck -verify %s
+// RUN: %target-swift-frontend(mock-sdk: %clang-importer-sdk) -enable-cxx-interop -typecheck -verify %s
 
 import cvars
 

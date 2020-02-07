@@ -1,4 +1,5 @@
 // RUN: %target-typecheck-verify-swift %clang-importer-sdk -swift-version 4
+// RUN: %target-typecheck-verify-swift %clang-importer-sdk
 
 import ctypes
 

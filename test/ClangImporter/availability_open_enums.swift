@@ -2,7 +2,6 @@
 
 // REQUIRES: objc_interop
 
-import Foundation
 import AvailabilityExtras
 
 func exhaustiveSwitch(e: NSEnumAddedCasesIn2017) {

@@ -1,4 +1,5 @@
 // RUN: %target-typecheck-verify-swift %clang-importer-sdk
+// RUN: %target-typecheck-verify-swift %clang-importer-sdk -enable-cxx-interop
 
 import ctypes
 
