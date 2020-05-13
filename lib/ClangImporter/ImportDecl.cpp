@@ -2784,21 +2784,25 @@ namespace {
 
       Optional<ImportedName> correctSwiftName;
       auto importedName = getClangDeclName(decl, correctSwiftName);
-      if (!importedName)
-        return nullptr;
 
       // If we've been asked to produce a compatibility stub, handle it via a
       // typealias.
-      if (correctSwiftName)
+      if (correctSwiftName && importedName)
         return importCompatibilityTypeAlias(decl, importedName,
                                             *correctSwiftName);
 
-      auto dc =
-          Impl.importDeclContextOf(decl, importedName.getEffectiveContext());
+      DeclContext *dc;
+      if(importedName) {
+        dc = Impl.importDeclContextOf(decl, importedName.getEffectiveContext());
+      } else {
+        auto effectiveContext = EffectiveClangContext(decl->getDeclContext());
+        dc = Impl.importDeclContextOf(decl, effectiveContext);
+      }
+
       if (!dc)
         return nullptr;
-      
-      auto name = importedName.getDeclName().getBaseIdentifier();
+
+      auto name = importedName ? importedName.getDeclName().getBaseIdentifier() : Identifier();
 
       // Create the enum declaration and record it.
       StructDecl *errorWrapper = nullptr;
@@ -2809,7 +2813,8 @@ namespace {
       case EnumKind::Constants: {
         // There is no declaration. Rather, the type is mapped to the
         // underlying type.
-        return nullptr;
+        result = nullptr;
+        break;
       }
 
       case EnumKind::Unknown: {
@@ -3037,7 +3042,9 @@ namespace {
       }
 
       const clang::EnumDecl *canonicalClangDecl = decl->getCanonicalDecl();
-      Impl.ImportedDecls[{canonicalClangDecl, getVersion()}] = result;
+      if(result) {
+        Impl.ImportedDecls[{canonicalClangDecl, getVersion()}] = result;
+      }
 
       // Import each of the enumerators.
       
@@ -3213,9 +3220,12 @@ namespace {
                                              errorWrapper);
             addDecl(errorWrapper, alias);
           }
+        } else if (dc->getASTContext().LangOpts.EnableCXXInterop) {
+          if(auto parent = dyn_cast<swift::StructDecl>(dc)) {
+            parent->addMember(enumeratorDecl);
+          }
         }
       }
-
       return result;
     }
 
@@ -3585,7 +3595,7 @@ namespace {
         auto result = Impl.createConstant(name, dc, enumType,
                                           clang::APValue(decl->getInitVal()),
                                           ConstantConvertKind::Construction,
-                                          /*static*/ false, decl);
+                                          /*static*/dc->isTypeContext(), decl);
         Impl.ImportedDecls[{decl->getCanonicalDecl(), getVersion()}] = result;
 
         // If this is a compatibility stub, mark it as such.

@@ -8,12 +8,14 @@
 // CHECK-NEXT:   struct PublicStruct {
 // CHECK-NEXT:     init()
 // CHECK-NEXT:   }
+// CHECK-NEXT:   static var PublicEnumValue1: PublicPrivate.PublicEnum { get }
 // CHECK-NEXT:   struct PublicEnum : Equatable, RawRepresentable {
 // CHECK-NEXT:     init(_ rawValue: [[ENUM_UNDERLYING_TYPE:Int32|UInt32]])
 // CHECK-NEXT:     init(rawValue: [[ENUM_UNDERLYING_TYPE]])
 // CHECK-NEXT:     var rawValue: [[ENUM_UNDERLYING_TYPE]]
 // CHECK-NEXT:     typealias RawValue = [[ENUM_UNDERLYING_TYPE]]
 // CHECK-NEXT:   }
+// CHECK-NEXT:   static var PublicAnonymousEnumValue: Int { get }
 // CHECK-NEXT:   @frozen enum PublicClosedEnum : [[ENUM_UNDERLYING_TYPE]] {
 // CHECK-NEXT:     init?(rawValue: [[ENUM_UNDERLYING_TYPE]])
 // CHECK-NEXT:     var rawValue: [[ENUM_UNDERLYING_TYPE]] { get }
