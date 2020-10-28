@@ -23,6 +23,7 @@
 #include "swift/AST/ClangModuleLoader.h"
 #include "swift/AST/DiagnosticsSema.h"
 #include "swift/AST/ExistentialLayout.h"
+#include "swift/AST/ModuleNameLookup.h"
 #include "swift/AST/Pattern.h"
 #include "swift/AST/ParameterList.h"
 #include "swift/AST/ProtocolConformance.h"
@@ -1475,6 +1476,42 @@ getDisallowedOriginKind(const Decl *decl,
                         DowngradeToWarning &downgradeToWarning) {
   downgradeToWarning = DowngradeToWarning::No;
   ModuleDecl *M = decl->getModuleContext();
+
+  // Even if the current module is @_implementationOnly, Swift should
+  // not report an error in the cases where the decl is also exported from
+  // a non @_implementationOnly module. Thus, we look at all the imported
+  // modules and see if we can find the decl in a non @_implementationOnly
+  // module.
+  
+  SmallVector<ImportedModule, 4> importedModules;
+  userSF.getImportedModules(
+      importedModules,
+      ModuleDecl::ImportFilter(
+          {ModuleDecl::ImportFilterKind::Exported,
+           ModuleDecl::ImportFilterKind::Default,
+           ModuleDecl::ImportFilterKind::SPIAccessControl,
+           ModuleDecl::ImportFilterKind::ShadowedByCrossImportOverlay}));
+  auto nlOptions = NL_QualifiedDefault | NL_IncludeUsableFromInline;
+  auto val = dyn_cast<ValueDecl>(decl);    
+
+  if(val && !val->getBaseName().isSpecial()) {
+    for (auto &importedModule : importedModules) {
+      SmallVector<ValueDecl *, 4> candidateDecls;
+      namelookup::lookupInModule(importedModule.importedModule, val->getName(),
+                                candidateDecls, NLKind::UnqualifiedLookup,
+                                namelookup::ResolutionKind::Overloadable,
+                                importedModule.importedModule, nlOptions);
+      for (auto *candidateDecl : candidateDecls) {
+        if (candidateDecl->getFormalAccess() >= AccessLevel::Public) {
+          return DisallowedOriginKind::None;
+        }
+      }
+    }
+  } else {
+    if(val) {
+      val->dump();
+    }
+  }
   if (userSF.isImportedImplementationOnly(M)) {
     // Temporarily downgrade implementation-only exportability in SPI to
     // a warning.

@@ -161,34 +161,6 @@ static bool diagnoseDeclExportability(SourceLoc loc, const ValueDecl *D,
   if (originKind == DisallowedOriginKind::None)
     return false;
 
-  // Even if the current module is @_implementationOnly, Swift should
-  // not report an error in the cases where the decl is also exported from
-  // a non @_implementationOnly module. Thus, we look at all the imported
-  // modules and see if we can find the decl in a non @_implementationOnly
-  // module.
-  SmallVector<ImportedModule, 4> importedModules;
-  userSF.getImportedModules(
-      importedModules,
-      ModuleDecl::ImportFilter(
-          {ModuleDecl::ImportFilterKind::Exported,
-           ModuleDecl::ImportFilterKind::Default,
-           ModuleDecl::ImportFilterKind::SPIAccessControl,
-           ModuleDecl::ImportFilterKind::ShadowedByCrossImportOverlay}));
-  auto nlOptions = NL_UnqualifiedDefault | NL_IncludeUsableFromInline;
-
-  for (auto &importedModule : importedModules) {
-    SmallVector<ValueDecl *, 4> decls;
-    namelookup::lookupInModule(importedModule.importedModule, D->getName(),
-                               decls, NLKind::UnqualifiedLookup,
-                               namelookup::ResolutionKind::Overloadable,
-                               importedModule.importedModule, nlOptions);
-
-    for (auto *decl : decls) {
-      if (decl->getFormalAccess() >= AccessLevel::Public) {
-        return false;
-      }
-    }
-  }
   // TODO: different diagnostics
   ASTContext &ctx = definingModule->getASTContext();
   ctx.Diags.diagnose(loc, diag::inlinable_decl_ref_from_hidden_module,
