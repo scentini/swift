@@ -162,9 +162,9 @@ static bool diagnoseDeclExportability(SourceLoc loc, const ValueDecl *D,
     return false;
 
   // Even if the current module is @_implementationOnly, Swift should
-  // not report an error in the cases where the symbol is also exported from
+  // not report an error in the cases where the decl is also exported from
   // a non @_implementationOnly module. Thus, we look at all the imported
-  // modules and see if we can find the symbol in a non @_implementationOnly
+  // modules and see if we can find the decl in a non @_implementationOnly
   // module.
   SmallVector<ImportedModule, 4> importedModules;
   userSF.getImportedModules(
