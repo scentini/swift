@@ -1386,7 +1386,7 @@ static ManagedValue emitBuiltinConvertUnownedUnsafeToGuaranteed(
   // Now convert our unownedNonTrivialRef from unowned ownership to guaranteed
   // ownership and create a cleanup for it.
   SILValue guaranteedNonTrivialRef = SGF.B.createUncheckedOwnershipConversion(
-      loc, unownedNonTrivialRef, ValueOwnershipKind::Guaranteed);
+      loc, unownedNonTrivialRef, OwnershipKind::Guaranteed);
   auto guaranteedNonTrivialRefMV =
       SGF.emitManagedBorrowedRValueWithCleanup(guaranteedNonTrivialRef);
   // Now create a mark dependence on our base and return the result.
@@ -1405,7 +1405,7 @@ static ManagedValue emitBuiltinGetCurrentAsyncTask(
   return SGF.emitManagedRValueWithEndLifetimeCleanup(apply);
 }
 
-// Emit SIL for the named builtin: getCurrentAsyncTask.
+// Emit SIL for the named builtin: cancelAsyncTask.
 static ManagedValue emitBuiltinCancelAsyncTask(
     SILGenFunction &SGF, SILLocation loc, SubstitutionMap subs,
     ArrayRef<ManagedValue> args, SGFContext C) {
@@ -1417,6 +1417,22 @@ static ManagedValue emitBuiltinCancelAsyncTask(
       SGF.getLoweredType(ctx.TheEmptyTupleType), SubstitutionMap(),
       { argument });
   return ManagedValue::forUnmanaged(apply);
+}
+
+// Emit SIL for the named builtin: createAsyncTask.
+static ManagedValue emitBuiltinCreateAsyncTask(
+    SILGenFunction &SGF, SILLocation loc, SubstitutionMap subs,
+    ArrayRef<ManagedValue> args, SGFContext C) {
+  ASTContext &ctx = SGF.getASTContext();
+  auto flags = args[0].forward(SGF);
+  auto parentTask = args[1].borrow(SGF, loc).forward(SGF);
+  auto function = args[2].borrow(SGF, loc).forward(SGF);
+  auto apply = SGF.B.createBuiltin(
+      loc,
+      ctx.getIdentifier(getBuiltinName(BuiltinValueKind::CreateAsyncTask)),
+      SGF.getLoweredType(getAsyncTaskAndContextType(ctx)), SubstitutionMap(),
+      { flags, parentTask, function });
+  return SGF.emitManagedRValueWithCleanup(apply);
 }
 
 Optional<SpecializedEmitter>

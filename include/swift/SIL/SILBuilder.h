@@ -777,7 +777,7 @@ public:
 
   SILValue emitBeginBorrowOperation(SILLocation loc, SILValue v) {
     if (!hasOwnership() ||
-        v.getOwnershipKind().isCompatibleWith(ValueOwnershipKind::Guaranteed))
+        v.getOwnershipKind().isCompatibleWith(OwnershipKind::Guaranteed))
       return v;
     return createBeginBorrow(loc, v);
   }
@@ -1969,7 +1969,7 @@ public:
 
   ReturnInst *createReturn(SILLocation Loc, SILValue ReturnValue) {
     return insertTerminator(new (getModule()) ReturnInst(
-        getSILDebugLocation(Loc), ReturnValue));
+        getFunction(), getSILDebugLocation(Loc), ReturnValue));
   }
 
   ThrowInst *createThrow(SILLocation Loc, SILValue errorValue) {
@@ -2255,7 +2255,7 @@ public:
   /// lowering for the non-address value.
   void emitDestroyValueOperation(SILLocation Loc, SILValue v) {
     assert(!v->getType().isAddress());
-    if (F->hasOwnership() && v.getOwnershipKind() == ValueOwnershipKind::None)
+    if (F->hasOwnership() && v.getOwnershipKind() == OwnershipKind::None)
       return;
     auto &lowering = getTypeLowering(v->getType());
     lowering.emitDestroyValue(*this, Loc, v);
@@ -2267,7 +2267,7 @@ public:
       SILLocation Loc, SILValue v,
       Lowering::TypeLowering::TypeExpansionKind expansionKind) {
     assert(!v->getType().isAddress());
-    if (F->hasOwnership() && v.getOwnershipKind() == ValueOwnershipKind::None)
+    if (F->hasOwnership() && v.getOwnershipKind() == OwnershipKind::None)
       return;
     auto &lowering = getTypeLowering(v->getType());
     lowering.emitLoweredDestroyValue(*this, Loc, v, expansionKind);
@@ -2500,6 +2500,10 @@ public:
                                SILInstruction *InheritScopeFrom)
       : SILBuilder(BB, InheritScopeFrom->getDebugScope(),
                    B.getBuilderContext()) {}
+
+  explicit SILBuilderWithScope(SILBasicBlock *BB, SILBuilderContext &C,
+                               const SILDebugScope *debugScope)
+      : SILBuilder(BB, debugScope, C) {}
 
   /// Creates a new SILBuilder with an insertion point at the
   /// beginning of BB and the debug scope from the first

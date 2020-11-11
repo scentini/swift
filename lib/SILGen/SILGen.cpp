@@ -1808,7 +1808,7 @@ public:
         if (SGF.B.hasValidInsertionPoint())
           SGF.B.createBranch(returnLoc, returnBB, returnValue);
         returnValue =
-            returnBB->createPhiArgument(returnType, ValueOwnershipKind::Owned);
+            returnBB->createPhiArgument(returnType, OwnershipKind::Owned);
         SGF.B.emitBlock(returnBB);
 
         // Emit the rethrow block.
@@ -1950,6 +1950,11 @@ ASTLoweringRequest::evaluate(Evaluator &evaluator,
   // If all function bodies are being skipped there's no reason to do any
   // SIL generation.
   if (desc.opts.SkipFunctionBodies == FunctionBodySkipping::All)
+    return silMod;
+
+  // Skip emitting SIL if there's been any compilation errors
+  if (silMod->getASTContext().hadError() &&
+      silMod->getASTContext().LangOpts.AllowModuleWithCompilerErrors)
     return silMod;
 
   SILGenModuleRAII scope(*silMod);

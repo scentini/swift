@@ -802,7 +802,8 @@ NOTE(invalid_redecl_implicit_wrapper,none,
 ERROR(ambiguous_type_base,none,
       "%0 is ambiguous for type lookup in this context", (DeclNameRef))
 ERROR(invalid_member_type,none,
-      "%0 is not a member type of %1", (DeclNameRef, Type))
+      "%0 is not a member type of %1 %2",
+      (DeclNameRef, DescriptiveDeclKind, FullyQualified<Type>))
 ERROR(invalid_member_type_suggest,none,
       "%0 does not have a member type named %1; did you mean %2?",
       (Type, DeclNameRef, DeclName))
@@ -1553,10 +1554,13 @@ ERROR(observingprop_requires_initializer,none,
       "non-member observing properties require an initializer", ())
 ERROR(global_requires_initializer,none,
       "global '%select{var|let}0' declaration requires an initializer expression"
-      "%select{ or getter/setter specifier|}0", (bool))
+      "%select{ or an explicitly stated getter|}0", (bool))
 ERROR(static_requires_initializer,none,
-      "%select{ERROR|'static var'|'class var'|}0 declaration requires an initializer "
-      "expression or getter/setter specifier", (StaticSpellingKind))
+      "'%select{ERROR|static|class|}0 %select{var|let}1' declaration requires "
+      "an initializer expression or an explicitly stated getter",
+      (StaticSpellingKind, bool))
+NOTE(static_requires_initializer_add_init,none,
+      "add an initializer to silence this error", ())
 ERROR(pattern_type_access,none,
       "%select{%select{variable|constant}0|property}1 "
       "%select{must be declared %select{"
@@ -2757,12 +2761,8 @@ ERROR(conformance_from_implementation_only_module,none,
       "the conformance is declared as SPI in %3|"
       "the conformance is declared as SPI}4",
       (Type, Identifier, unsigned, Identifier, unsigned))
-ERROR(assoc_conformance_from_implementation_only_module,none,
-      "cannot use conformance of %0 to %1 in associated type %3 (inferred as "
-      "%4); %select{%2 has been imported as implementation-only|"
-      "the conformance is declared as SPI in %2|"
-      "the conformance is declared as SPI}5",
-      (Type, Identifier, Identifier, Type, Type, unsigned))
+NOTE(assoc_conformance_from_implementation_only_module,none,
+     "in associated type %0 (inferred as %1)", (Type, Type))
 ERROR(unexportable_clang_function_type,none,
       "cannot export the underlying C type of the function type %0; "
       "it may use anonymous types or types defined outside of a module",
@@ -4531,6 +4531,9 @@ ERROR(invalid_objc_decl,none,
       "properties, and subscript declarations can be declared @objc", ())
 ERROR(invalid_objc_swift_rooted_class,none,
       "only classes that inherit from NSObject can be declared @objc", ())
+NOTE(invalid_objc_swift_root_class_insert_nsobject,none,
+     "inherit from 'NSObject' to silence this error", ())
+
 ERROR(invalid_nonobjc_decl,none,
       "only class members and extensions of classes can be declared @nonobjc", ())
 ERROR(invalid_nonobjc_extension,none,
@@ -5039,6 +5042,39 @@ ERROR(availability_macro_in_inlinable, none,
 ERROR(availabilty_string_subscript_migration, none,
       "subscripts returning String were obsoleted in Swift 4; explicitly "
       "construct a String from subscripted result", ())
+
+// Conformance availability checking diagnostics
+
+ERROR(conformance_availability_unavailable, none,
+      "conformance of %0 to %1 is unavailable"
+      "%select{ in %3|}2%select{|: %4}4",
+      (Type, Type, bool, StringRef, StringRef))
+
+NOTE(conformance_availability_marked_unavailable, none,
+     "conformance of %0 to %1 has been explicitly marked "
+     "unavailable here", (Type, Type))
+
+NOTE(conformance_availability_introduced_in_version, none,
+     "conformance of %0 to %1 was introduced in %2 %3",
+     (Type, Type, StringRef, llvm::VersionTuple))
+
+NOTE(conformance_availability_obsoleted, none,
+     "conformance of %0 to %1 was obsoleted in %2 %3",
+     (Type, Type, StringRef, llvm::VersionTuple))
+
+WARNING(conformance_availability_deprecated, none,
+        "conformance of %0 to %1 %select{is|%select{is|was}4}2 "
+        "deprecated%select{| in %3%select{| %5}4}2%select{|: %6}6",
+        (Type, Type, bool, StringRef, bool, llvm::VersionTuple,
+         StringRef))
+
+ERROR(conformance_availability_only_version_newer, none,
+      "conformance of %0 to %1 is only available in %2 %3 or newer",
+      (Type, Type, StringRef, llvm::VersionTuple))
+
+WARNING(conformance_availability_only_version_newer_warn, none,
+        "conformance of %0 to %1 is only available in %2 %3 or newer",
+        (Type, Type, StringRef, llvm::VersionTuple))
 
 //------------------------------------------------------------------------------
 // MARK: @discardableResult

@@ -46,3 +46,22 @@ decltype(auto) testAuto(T arg) {
 template <class T> struct Dep { using TT = T; };
 
 template <class T> void useDependentType(typename Dep<T>::TT) {}
+
+template <class T> void lvalueReference(T &ref) { ref = 42; }
+
+template <class T> void constLvalueReference(const T &) {}
+
+template <class T> void forwardingReference(T &&) {}
+
+namespace Orbiters {
+
+template<class T>
+void galileo(T) { }
+
+template<class T, class U>
+void cassini(T, U) { }
+
+template<class T>
+void magellan(T&) { }
+
+}

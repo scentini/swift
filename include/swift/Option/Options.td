@@ -177,6 +177,10 @@ def verify_incremental_dependencies :
   Flags<[FrontendOption, HelpHidden]>,
   HelpText<"Enable the dependency verifier for each frontend job">;
 
+def disallow_forwarding_driver :
+  Flag<["-"], "disallow-use-new-driver">, Flags<[]>,
+  HelpText<"Disable using new swift-driver">;
+
 def driver_emit_fine_grained_dependency_dot_file_after_every_import :
 Flag<["-"], "driver-emit-fine-grained-dependency-dot-file-after-every-import">,
 InternalDebugOpt,
@@ -1104,6 +1108,10 @@ def scan_dependencies : Flag<["-"], "scan-dependencies">,
 
 def scan_clang_dependencies : Flag<["-"], "scan-clang-dependencies">,
   HelpText<"Scan dependencies of the given Clang module">, ModeOpt,
+  Flags<[FrontendOption, NoInteractiveOption, DoesNotAffectIncrementalBuild]>;
+
+def emit_supported_features : Flag<["-"], "emit-supported-features">,
+  HelpText<"Emit a JSON file including all supported compiler features">, ModeOpt,
   Flags<[FrontendOption, NoInteractiveOption, DoesNotAffectIncrementalBuild]>;
 
 def disable_parser_lookup : Flag<["-"], "disable-parser-lookup">,

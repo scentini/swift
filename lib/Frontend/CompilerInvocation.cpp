@@ -376,6 +376,9 @@ static bool ParseLangArgs(LangOptions &Opts, ArgList &Args,
   Opts.EnableExperimentalConcurrency |=
     Args.hasArg(OPT_enable_experimental_concurrency);
 
+  Opts.DisableImplicitConcurrencyModuleImport |=
+    Args.hasArg(OPT_disable_implicit_concurrency_module_import);
+
   Opts.EnableSubstSILFunctionTypesForFunctionValues |=
     Args.hasArg(OPT_enable_subst_sil_function_types_for_function_values);
 
@@ -390,6 +393,12 @@ static bool ParseLangArgs(LangOptions &Opts, ArgList &Args,
 
   Opts.DisableAvailabilityChecking |=
       Args.hasArg(OPT_disable_availability_checking);
+
+  if (auto A = Args.getLastArg(OPT_enable_conformance_availability_errors,
+                               OPT_disable_conformance_availability_errors)) {
+    Opts.EnableConformanceAvailabilityErrors
+      = A->getOption().matches(OPT_enable_conformance_availability_errors);
+  }
 
   if (auto A = Args.getLastArg(OPT_enable_access_control,
                                OPT_disable_access_control)) {
@@ -672,6 +681,10 @@ static bool ParseLangArgs(LangOptions &Opts, ArgList &Args,
       FrontendOpts.InputsAndOutputs.shouldTreatAsSIL()) {
     Opts.EnableAccessControl = false;
     Opts.DisableAvailabilityChecking = true;
+  }
+
+  if (FrontendOpts.AllowModuleWithCompilerErrors) {
+    Opts.AllowModuleWithCompilerErrors = true;
   }
 
   return HadError || UnsupportedOS || UnsupportedArch;
